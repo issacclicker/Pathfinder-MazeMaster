@@ -4,6 +4,9 @@ public class MazeTest : MonoBehaviour
 {
     // 미래 + 판타지 + 광부 복합 테마 적용 테스트 (사이즈 15 * 15)
 
+    [SerializeField]
+    private GameObject mazeRenderer;
+
     [SerializeField] [Tooltip("미로 크기")]
     int mazeSize = 3;
 
@@ -37,5 +40,7 @@ public class MazeTest : MonoBehaviour
             mazeGridText += "\n";
         }
         Debug.Log(mazeGridText);
+
+        mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
     }
 }
