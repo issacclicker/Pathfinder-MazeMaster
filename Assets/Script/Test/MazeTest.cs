@@ -6,6 +6,8 @@ public class MazeTest : MonoBehaviour
 
     [SerializeField]
     private GameObject mazeRenderer;
+    [SerializeField]
+    private GameObject playerController;
 
     [SerializeField] [Tooltip("미로 크기")]
     int mazeSize = 3;
@@ -42,5 +44,6 @@ public class MazeTest : MonoBehaviour
         Debug.Log(mazeGridText);
 
         mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
+        playerController.GetComponent<PlayerController>().InitPlayer(resultMaze);
     }
 }

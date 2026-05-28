@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 미로 내 플레이어 캐릭터를 제어합니다.
@@ -147,9 +148,24 @@ public class PlayerController : MonoBehaviour
         }
 
         // 비주얼 준비
+        // GridLayoutGroup은 다음 프레임에 셀 위치를 확정하므로,
+        // SnapToCell을 한 프레임 뒤 코루틴으로 실행합니다.
         EnsurePlayerVisual();
-        SnapToCell(playerRow, playerCol);
-        playerVisual.gameObject.SetActive(true);
+        playerVisual.gameObject.SetActive(false); // 위치 확정 전까지 숨김
+        StartCoroutine(SnapToCellNextFrame(playerRow, playerCol));
+    }
+
+    /// <summary>
+    /// GridLayoutGroup의 레이아웃 계산이 완료된 다음 프레임에 SnapToCell을 실행합니다.
+    /// </summary>
+    private IEnumerator SnapToCellNextFrame(int row, int col)
+    {
+        // 한 프레임 대기: GridLayoutGroup이 셀 위치를 확정할 시간을 줍니다.
+        yield return null;
+
+        SnapToCell(row, col);
+        if (playerVisual != null)
+            playerVisual.gameObject.SetActive(true);
     }
 
     /// <summary>
@@ -501,29 +517,40 @@ public class PlayerController : MonoBehaviour
     // ───────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 셀 (row, col)의 anchoredPosition을 계산합니다.
-    /// GridLayoutGroup의 cellSize와 spacing을 참조합니다.
+    /// 셀 (row, col)의 anchoredPosition을 반환합니다.
+    ///
+    /// [수정 내용]
+    /// 기존에 GridLayoutGroup의 cellSize/spacing으로 직접 계산했으나,
+    /// gridContainer의 pivot이 (0.5, 0.5) 중앙(Unity 기본값)일 때
+    /// 계산값이 어긋나 플레이어가 미로 밖에 배치되는 문제가 있었습니다.
+    ///
+    /// 수정 후: 셀 오브젝트("Cell_row_col")의 실제 위치를 직접 읽어
+    /// gridContainer 로컬 좌표로 변환합니다.
+    /// 이 방식은 pivot/anchor 설정과 무관하게 항상 정확합니다.
     /// </summary>
     private Vector2 GetCellAnchoredPosition(int row, int col)
     {
-        GridLayoutGroup glg = gridContainer.GetComponent<GridLayoutGroup>();
-        if (glg == null)
+        // 셀 오브젝트를 이름으로 탐색
+        Transform cellTransform = gridContainer.Find($"Cell_{row}_{col}");
+        if (cellTransform == null)
         {
-            Debug.LogWarning("[PlayerController] gridContainer에 GridLayoutGroup이 없습니다.");
+            Debug.LogWarning($"[PlayerController] Cell_{row}_{col} 오브젝트를 찾을 수 없습니다.");
             return Vector2.zero;
         }
 
-        float cellW   = glg.cellSize.x;
-        float cellH   = glg.cellSize.y;
-        float spacingX = glg.spacing.x;
-        float spacingY = glg.spacing.y;
+        RectTransform cellRt = cellTransform.GetComponent<RectTransform>();
+        if (cellRt == null)
+        {
+            Debug.LogWarning($"[PlayerController] Cell_{row}_{col}에 RectTransform이 없습니다.");
+            return Vector2.zero;
+        }
 
-        // GridLayoutGroup은 UpperLeft 기준, anchoredPosition은 중앙 pivot 기준
-        // gridContainer의 pivot이 (0,1) (좌상단)이라 가정
-        float x = col * (cellW + spacingX) + cellW * 0.5f;
-        float y = -(row * (cellH + spacingY) + cellH * 0.5f);
+        // 셀의 월드 중심 위치를 gridContainer 로컬 좌표로 변환
+        // → pivot/anchor 값에 무관하게 항상 정확한 위치를 반환
+        Vector3 worldCenter = cellRt.TransformPoint(Vector3.zero);
+        Vector2 localCenter = gridContainer.InverseTransformPoint(worldCenter);
 
-        return new Vector2(x, y);
+        return localCenter;
     }
 
     // ───────────────────────────────────────────────────────────
@@ -744,34 +771,35 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         // matrix == null: InitPlayer()가 아직 호출되지 않은 상태
-        // 이 경우 입력을 받아도 동작하지 않습니다.
         // InitPlayer()를 Start() 또는 미로 생성 직후에 호출했는지 확인하세요.
         if (matrix == null)
         {
-            // 키를 눌렀을 때만 경고 출력 (매 프레임 출력 방지)
-            if (Input.anyKeyDown)
+            if (Keyboard.current != null && Keyboard.current.anyKey.wasPressedThisFrame)
                 Debug.LogWarning("[PlayerController] matrix가 null입니다. InitPlayer()를 먼저 호출하세요.");
             return;
         }
 
         if (isMoving) return;
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+        // Keyboard.current가 null이면 키보드 장치가 없는 환경 (모바일 등)
+        if (Keyboard.current == null) return;
+
+        if (Keyboard.current.wKey.wasPressedThisFrame || Keyboard.current.upArrowKey.wasPressedThisFrame)
         {
             Debug.Log("[PlayerController] 위 이동 입력");
             TryMove(0);
         }
-        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else if (Keyboard.current.sKey.wasPressedThisFrame || Keyboard.current.downArrowKey.wasPressedThisFrame)
         {
             Debug.Log("[PlayerController] 아래 이동 입력");
             TryMove(1);
         }
-        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
+        else if (Keyboard.current.aKey.wasPressedThisFrame || Keyboard.current.leftArrowKey.wasPressedThisFrame)
         {
             Debug.Log("[PlayerController] 왼쪽 이동 입력");
             TryMove(2);
         }
-        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Keyboard.current.dKey.wasPressedThisFrame || Keyboard.current.rightArrowKey.wasPressedThisFrame)
         {
             Debug.Log("[PlayerController] 오른쪽 이동 입력");
             TryMove(3);

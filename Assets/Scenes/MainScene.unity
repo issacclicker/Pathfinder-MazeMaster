@@ -722,7 +722,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
   mazeRenderer: {fileID: 710257235}
   gridContainer: {fileID: 211656188}
-  playerVisual: {fileID: 2089612916}
+  playerVisual: {fileID: 0}
   playerColor: {r: 1, g: 0.85, b: 0.1, a: 1}
   playerSizeRatio: 0.75
   moveDuration: 0.12
@@ -848,6 +848,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MazeTest
   mazeRenderer: {fileID: 710257233}
+  playerController: {fileID: 1336083175}
   mazeSize: 7
   myThemes: 0000000101
 --- !u!4 &2101018210
