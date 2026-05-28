@@ -850,7 +850,7 @@ MonoBehaviour:
   mazeRenderer: {fileID: 710257233}
   playerController: {fileID: 1336083175}
   mazeSize: 7
-  myThemes: 0000000101
+  myThemes: 0100000000
 --- !u!4 &2101018210
 Transform:
   m_ObjectHideFlags: 0

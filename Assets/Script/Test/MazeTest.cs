@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class MazeTest : MonoBehaviour
 {
@@ -8,6 +9,8 @@ public class MazeTest : MonoBehaviour
     private GameObject mazeRenderer;
     [SerializeField]
     private GameObject playerController;
+
+    private Maze _maze;
 
     [SerializeField] [Tooltip("미로 크기")]
     int mazeSize = 3;
@@ -43,7 +46,18 @@ public class MazeTest : MonoBehaviour
         }
         Debug.Log(mazeGridText);
 
-        mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
-        playerController.GetComponent<PlayerController>().InitPlayer(resultMaze);
+        _maze = resultMaze;
+        StartCoroutine(RenderMaze());
+        // mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
+        // playerController.GetComponent<PlayerController>().InitPlayer(resultMaze);
+    }
+
+    IEnumerator RenderMaze()
+    {
+        mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(_maze);
+        yield return new WaitForSeconds(.1f);
+        playerController.GetComponent<PlayerController>().InitPlayer(_maze);
+        yield return new WaitForSeconds(.1f);
+        playerController.GetComponent<PlayerController>().SnapToCell(1,1);
     }
 }

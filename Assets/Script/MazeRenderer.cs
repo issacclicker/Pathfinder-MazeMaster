@@ -159,6 +159,21 @@ public class MazeRenderer : MonoBehaviour
     }
 
     /// <summary>
+    /// 셀 (row, col)의 RectTransform을 반환합니다.
+    /// PlayerController가 셀 위치를 직접 읽을 때 사용합니다.
+    /// Find() 검색 없이 cellImages 배열을 직접 참조하므로 이름/Clone 문제가 없습니다.
+    /// </summary>
+    public RectTransform GetCellRectTransform(int row, int col)
+    {
+        if (cellImages == null || row < 0 || row >= currentN || col < 0 || col >= currentN)
+        {
+            Debug.LogWarning($"[MazeRenderer] GetCellRectTransform 범위 초과 또는 초기화 전: ({row}, {col})");
+            return null;
+        }
+        return cellImages[row, col].rectTransform;
+    }
+
+    /// <summary>
     /// 현재 렌더링된 셀 오브젝트를 모두 삭제합니다.
     /// </summary>
     public void ClearGrid()

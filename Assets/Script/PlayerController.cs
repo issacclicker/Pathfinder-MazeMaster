@@ -136,6 +136,7 @@ public class PlayerController : MonoBehaviour
                     playerRow = r;
                     playerCol = c;
                     found = true;
+                    
                 }
             }
         }
@@ -148,24 +149,34 @@ public class PlayerController : MonoBehaviour
         }
 
         // 비주얼 준비
-        // GridLayoutGroup은 다음 프레임에 셀 위치를 확정하므로,
-        // SnapToCell을 한 프레임 뒤 코루틴으로 실행합니다.
         EnsurePlayerVisual();
         playerVisual.gameObject.SetActive(false); // 위치 확정 전까지 숨김
-        StartCoroutine(SnapToCellNextFrame(playerRow, playerCol));
+        StartCoroutine(SnapToCellAfterLayout(playerRow, playerCol));
     }
 
     /// <summary>
-    /// GridLayoutGroup의 레이아웃 계산이 완료된 다음 프레임에 SnapToCell을 실행합니다.
+    /// GridLayoutGroup 레이아웃이 완전히 확정된 뒤 SnapToCell을 실행합니다.
+    ///
+    /// WaitForEndOfFrame으로 렌더링 직전까지 대기한 뒤 ForceRebuildLayoutImmediate를
+    /// 호출해 셀 anchoredPosition과 gridContainer 크기를 완전히 확정합니다.
     /// </summary>
-    private IEnumerator SnapToCellNextFrame(int row, int col)
+    private IEnumerator SnapToCellAfterLayout(int row, int col)
     {
-        // 한 프레임 대기: GridLayoutGroup이 셀 위치를 확정할 시간을 줍니다.
-        yield return null;
+        yield return new WaitForEndOfFrame();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(gridContainer);
+
+        // 디버그: 위치가 올바르게 잡혔는지 확인 (문제 해결 후 제거 가능)
+        RectTransform cellRt = mazeRenderer.GetCellRectTransform(row, col);
+        if (cellRt != null)
+        {
+            Debug.Log($"[PlayerController] 시작셀({row},{col}) anchoredPos={cellRt.anchoredPosition} rect.center={cellRt.rect.center}");
+            Debug.Log($"[PlayerController] gridContainer size={gridContainer.rect.size}");
+        }
 
         SnapToCell(row, col);
         if (playerVisual != null)
             playerVisual.gameObject.SetActive(true);
+
     }
 
     /// <summary>
@@ -442,12 +453,13 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// 현재 위치에서 (toRow, toCol)까지 duration 시간 동안 부드럽게 이동합니다.
+    /// position(월드 좌표)을 직접 보간하므로 앵커/pivot과 무관하게 정확합니다.
     /// </summary>
     private IEnumerator SlideTo(int toRow, int toCol, int moveDistance, int moveDir, float duration)
     {
         RectTransform rt = playerVisual.rectTransform;
-        Vector2 startPos = rt.anchoredPosition;
-        Vector2 endPos   = GetCellAnchoredPosition(toRow, toCol);
+        Vector3 startPos = rt.position;
+        Vector3 endPos   = GetCellWorldCenter(toRow, toCol);
 
         float elapsed = 0f;
         while (elapsed < duration)
@@ -456,10 +468,10 @@ public class PlayerController : MonoBehaviour
             float t = Mathf.Clamp01(elapsed / duration);
             // EaseInOut 보간으로 자연스러운 가속/감속
             t = t * t * (3f - 2f * t);
-            rt.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+            rt.position = Vector3.Lerp(startPos, endPos, t);
             yield return null;
         }
-        rt.anchoredPosition = endPos;
+        rt.position = endPos;
     }
 
     /// <summary>
@@ -504,12 +516,31 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// 플레이어를 애니메이션 없이 즉시 해당 셀로 이동합니다.
+    /// 플레이어를 애니메이션 없이 즉시 해당 셀 중앙으로 이동합니다.
+    /// 셀의 월드 좌표를 Canvas 스크린 좌표로 변환한 뒤 RectTransform.position에
+    /// 직접 대입합니다. anchoredPosition 계산을 완전히 우회하므로
+    /// 앵커/pivot/Canvas 스케일과 무관하게 항상 정확합니다.
     /// </summary>
-    private void SnapToCell(int row, int col)
+    public void SnapToCell(int row, int col)
     {
         if (playerVisual == null) return;
-        playerVisual.rectTransform.anchoredPosition = GetCellAnchoredPosition(row, col);
+
+        RectTransform cellRt = mazeRenderer.GetCellRectTransform(row, col);
+        if (cellRt == null)
+        {
+            Debug.LogWarning($"[PlayerController] SnapToCell: ({row},{col}) 셀을 찾을 수 없습니다.");
+            return;
+        }
+
+        // 셀 중앙의 월드 좌표
+        // GetWorldCorners: [0]=좌하단, [1]=좌상단, [2]=우상단, [3]=우하단
+        Vector3[] corners = new Vector3[4];
+        cellRt.GetWorldCorners(corners);
+        Vector3 cellWorldCenter = (corners[0] + corners[2]) * 0.5f;
+
+        // 월드 좌표를 플레이어 RectTransform.position에 직접 대입
+        // position은 월드 좌표이므로 Canvas 스케일/모드 무관하게 동작합니다.
+        playerVisual.rectTransform.position = cellWorldCenter;
     }
 
     // ───────────────────────────────────────────────────────────
@@ -517,40 +548,22 @@ public class PlayerController : MonoBehaviour
     // ───────────────────────────────────────────────────────────
 
     /// <summary>
-    /// 셀 (row, col)의 anchoredPosition을 반환합니다.
-    ///
-    /// [수정 내용]
-    /// 기존에 GridLayoutGroup의 cellSize/spacing으로 직접 계산했으나,
-    /// gridContainer의 pivot이 (0.5, 0.5) 중앙(Unity 기본값)일 때
-    /// 계산값이 어긋나 플레이어가 미로 밖에 배치되는 문제가 있었습니다.
-    ///
-    /// 수정 후: 셀 오브젝트("Cell_row_col")의 실제 위치를 직접 읽어
-    /// gridContainer 로컬 좌표로 변환합니다.
-    /// 이 방식은 pivot/anchor 설정과 무관하게 항상 정확합니다.
+    /// 셀 (row, col)의 월드 좌표 중심을 반환합니다.
+    /// SlideTo 애니메이션의 목표 위치로 사용됩니다.
+    /// GetWorldCorners로 실제 렌더링 위치를 읽으므로 앵커/pivot과 무관합니다.
     /// </summary>
-    private Vector2 GetCellAnchoredPosition(int row, int col)
+    private Vector3 GetCellWorldCenter(int row, int col)
     {
-        // 셀 오브젝트를 이름으로 탐색
-        Transform cellTransform = gridContainer.Find($"Cell_{row}_{col}");
-        if (cellTransform == null)
-        {
-            Debug.LogWarning($"[PlayerController] Cell_{row}_{col} 오브젝트를 찾을 수 없습니다.");
-            return Vector2.zero;
-        }
-
-        RectTransform cellRt = cellTransform.GetComponent<RectTransform>();
+        RectTransform cellRt = mazeRenderer.GetCellRectTransform(row, col);
         if (cellRt == null)
         {
-            Debug.LogWarning($"[PlayerController] Cell_{row}_{col}에 RectTransform이 없습니다.");
-            return Vector2.zero;
+            Debug.LogWarning($"[PlayerController] ({row},{col}) 셀을 찾을 수 없습니다.");
+            return playerVisual.rectTransform.position; // 현재 위치 유지
         }
 
-        // 셀의 월드 중심 위치를 gridContainer 로컬 좌표로 변환
-        // → pivot/anchor 값에 무관하게 항상 정확한 위치를 반환
-        Vector3 worldCenter = cellRt.TransformPoint(Vector3.zero);
-        Vector2 localCenter = gridContainer.InverseTransformPoint(worldCenter);
-
-        return localCenter;
+        Vector3[] corners = new Vector3[4];
+        cellRt.GetWorldCorners(corners);
+        return (corners[0] + corners[2]) * 0.5f;
     }
 
     // ───────────────────────────────────────────────────────────
@@ -604,13 +617,13 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
-    /// gridContainer에서 (row, col) 인덱스의 Image 컴포넌트를 가져옵니다.
-    /// Cell 오브젝트 이름 규칙 "Cell_row_col"을 활용합니다.
+    /// (row, col) 셀의 Image 컴포넌트를 가져옵니다.
+    /// MazeRenderer.GetCellRectTransform()을 경유해 cellImages 배열을 직접 참조합니다.
     /// </summary>
     private Image GetCellImage(int row, int col)
     {
-        Transform t = gridContainer.Find($"Cell_{row}_{col}");
-        return t != null ? t.GetComponent<Image>() : null;
+        RectTransform rt = mazeRenderer.GetCellRectTransform(row, col);
+        return rt != null ? rt.GetComponent<Image>() : null;
     }
 
     // ───────────────────────────────────────────────────────────
@@ -698,14 +711,14 @@ public class PlayerController : MonoBehaviour
         playerVisual.sprite        = CreateCircleSprite(64);
         playerVisual.raycastTarget = false; // 셀 클릭 이벤트 투과
 
-        // ── 핵심 수정 2: 앵커를 좌상단(0,1)으로 고정 ──
-        // GetCellAnchoredPosition은 gridContainer pivot=(0,1) 기준으로
-        // x는 오른쪽(+), y는 아래쪽(-)으로 계산합니다.
-        // anchorMin/Max를 (0,1)로 맞춰야 anchoredPosition 기준점이 일치합니다.
+        // 앵커와 pivot 모두 (0.5, 0.5) 중앙으로 설정합니다.
+        // SnapToCell에서 셀의 월드 좌표를 Canvas 기준으로 변환해 직접 대입하므로
+        // 앵커 기준점이 무엇이든 상관없습니다.
         RectTransform rt = go.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0f, 1f); // 좌상단
-        rt.anchorMax = new Vector2(0f, 1f); // 좌상단
-        rt.pivot     = new Vector2(0.5f, 0.5f); // 오브젝트 자체 중심 기준
+        rt.anchorMin        = new Vector2(0.5f, 0.5f);
+        rt.anchorMax        = new Vector2(0.5f, 0.5f);
+        rt.pivot            = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = Vector2.zero;
 
         ApplyPlayerSize();
     }
