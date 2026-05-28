@@ -204,48 +204,55 @@ public class MazeRenderer : MonoBehaviour
         float totalSize = cellSize * n + spacing * (n - 1);
         gridContainer.sizeDelta = new Vector2(totalSize, totalSize);
 
-        // ── 셀 프리팹 준비 ──
-        GameObject prefab = GetOrCreateCellPrefab();
-
         // ── 셀 생성 ──
+        // cellPrefab이 지정된 경우 Instantiate, 없으면 직접 생성
+        // (임시 GameObject를 씬에 올렸다 삭제하는 방식을 제거)
+        GameObject prefab = GetOrCreateCellPrefab();
         cellImages = new Image[n, n];
+
         for (int row = 0; row < n; row++)
         {
             for (int col = 0; col < n; col++)
             {
-                GameObject cell = Instantiate(prefab, gridContainer);
-                cell.name = $"Cell_{row}_{col}";
-                Image img = cell.GetComponent<Image>();
+                GameObject cell;
+                if (prefab != null)
+                {
+                    // Inspector에 프리팹이 지정된 경우
+                    cell = Instantiate(prefab, gridContainer);
+                }
+                else
+                {
+                    // 프리팹 없음: gridContainer 자식으로 직접 생성
+                    // typeof(RectTransform)을 포함해 생성해야 Canvas 계층에 올바르게 편입됨
+                    cell = new GameObject("Cell", typeof(RectTransform));
+                    cell.transform.SetParent(gridContainer, false);
+                }
 
-                // 프리팹에 Image가 없으면 추가
+                cell.name = $"Cell_{row}_{col}";
+
+                Image img = cell.GetComponent<Image>();
                 if (img == null)
                     img = cell.AddComponent<Image>();
 
                 cellImages[row, col] = img;
             }
         }
-
-        // 런타임에 자동 생성한 임시 프리팹이면 제거
-        if (prefab.scene.rootCount == 0) // 씬에 없는 임시 오브젝트
-            Destroy(prefab);
     }
 
     /// <summary>
-    /// cellPrefab이 지정되어 있으면 반환, 없으면 Image만 가진 임시 GameObject를 생성합니다.
+    /// cellPrefab이 지정되어 있으면 반환, 없으면 null을 반환합니다.
+    /// 셀은 프리팹 없이 직접 생성하는 방식으로 변경했습니다.
+    ///
+    /// [수정 내용]
+    /// 기존에 new GameObject("TempCellPrefab")으로 임시 오브젝트를 만든 뒤
+    /// Instantiate의 원본으로 사용하고 나중에 Destroy했으나,
+    /// new GameObject()는 씬 루트에 실제 오브젝트를 생성하고
+    /// scene.rootCount 조건이 항상 false라 삭제되지 않는 문제가 있었습니다.
+    /// 프리팹 없이 gridContainer 자식으로 셀을 직접 생성하는 방식으로 교체했습니다.
     /// </summary>
     private GameObject GetOrCreateCellPrefab()
     {
-        if (cellPrefab != null) return cellPrefab;
-
-        // 임시 프리팹 자동 생성
-        GameObject temp = new GameObject("TempCellPrefab");
-        temp.AddComponent<Image>();
-
-        // RectTransform 기본값 설정
-        RectTransform rt = temp.GetComponent<RectTransform>();
-        rt.sizeDelta = Vector2.one * 10f;
-
-        return temp;
+        return cellPrefab; // null이면 BuildGrid에서 직접 생성
     }
 
     // ───────────────────────────────────────────────────────────
