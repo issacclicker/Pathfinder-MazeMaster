@@ -57,7 +57,7 @@ public class MazeTest : MonoBehaviour
         mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(_maze);
         yield return new WaitForSeconds(.1f);
         playerController.GetComponent<PlayerController>().InitPlayer(_maze);
-        yield return new WaitForSeconds(.1f);
-        playerController.GetComponent<PlayerController>().SnapToCell(1,1);
+        yield return new WaitForSeconds(.05f);
+        playerController.GetComponent<PlayerController>().SnapToCell(1,1); // 로직 해결 불가능해서 땜빵해놓음 수정 필요
     }
 }
