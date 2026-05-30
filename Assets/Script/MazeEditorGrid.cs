@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 에디터 그리드의 클릭/드래그 입력을 처리합니다.
@@ -256,7 +257,7 @@ public class MazeEditorGrid : MonoBehaviour
     private void Update()
     {
         // 마우스 버튼을 셀 밖에서 뗀 경우에도 드래그 종료
-        if (isDragging && !Input.GetMouseButton(0))
+        if (isDragging && Mouse.current != null && !Mouse.current.leftButton.isPressed)
             isDragging = false;
     }
 }
