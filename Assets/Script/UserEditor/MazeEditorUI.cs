@@ -62,6 +62,21 @@ public class MazeEditorUI : MonoBehaviour
     [Tooltip("상태 메시지 표시 텍스트 (저장 성공/실패 등)")]
     [SerializeField] private TMP_Text statusText;
 
+    [Header("── 테마 표시 UI ─────────────────────")]
+
+    [Tooltip("현재 미로의 활성 테마 목록을 표시하는 TMP_Text. 요소를 배치할 때마다 자동으로 갱신됩니다. 예시 표시: 판타지 | 미래 테마가 없으면: 기본")]
+    [SerializeField] private TMP_Text themeDisplayText;
+
+    [Tooltip("테마 태그 배경 색상 설정. 인덱스: 0=기본, 1=광부, 2=무법자, 3=판타지, 4=미래")]
+    [SerializeField] private Color[] themeColors = new Color[]
+    {
+        new Color(0.50f, 0.50f, 0.50f), // 기본  — 회색
+        new Color(0.80f, 0.55f, 0.10f), // 광부  — 황토
+        new Color(0.20f, 0.20f, 0.65f), // 무법자 — 남색
+        new Color(0.55f, 0.10f, 0.70f), // 판타지 — 보라
+        new Color(0.05f, 0.55f, 0.80f), // 미래  — 하늘
+    };
+
     [Header("── 인게임 파일 브라우저 ─────────────────")]
 
     [Tooltip("파일 브라우저 패널 (기본 비활성)")]
@@ -351,6 +366,9 @@ public class MazeEditorUI : MonoBehaviour
 
         fileBrowserPanel?.SetActive(false);
         ShowStatus($"불러오기 완료: {data.mazeName}");
+
+        // 불러온 데이터의 테마 표시 즉시 갱신
+        RefreshThemeDisplay();
     }
 
     private void OnDeleteFileClicked()
@@ -499,6 +517,12 @@ public class MazeEditorUI : MonoBehaviour
         currentData.themeFlags[2] = outlawOn;
         currentData.minerSkillCount  = minerOn  ? minerCnt  : 0;
         currentData.outlawSkillCount = outlawOn ? outlawCnt : 0;
+
+        // 광부/무법자 토글 변경 시 기본 테마 여부 재계산 후 UI 갱신
+        bool anyTheme = currentData.themeFlags[1] || currentData.themeFlags[2]
+                     || currentData.themeFlags[3] || currentData.themeFlags[4];
+        currentData.themeFlags[0] = !anyTheme;
+        RefreshThemeDisplay();
     }
 
     private void OnBgThemeChanged(string theme)
@@ -539,6 +563,43 @@ public class MazeEditorUI : MonoBehaviour
         bool anyTheme = currentData.themeFlags[1] || currentData.themeFlags[2]
                      || currentData.themeFlags[3] || currentData.themeFlags[4];
         currentData.themeFlags[0] = !anyTheme;
+
+        // 테마 표시 UI 갱신
+        RefreshThemeDisplay();
+    }
+
+    // ───────────────────────────────────────────────────────────
+    // 테마 표시 UI
+    // ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 현재 themeFlags를 읽어 themeDisplayText를 갱신합니다.
+    ///
+    /// TMP RichText를 사용해 각 테마 이름을 해당 색상으로 표시합니다.
+    /// 활성 테마가 여러 개면 " | "로 구분합니다.
+    /// 예: <color=#CC8810>광부</color> | <color=#8C1AB3>판타지</color>
+    /// </summary>
+    private void RefreshThemeDisplay()
+    {
+        if (themeDisplayText == null || currentData == null) return;
+
+        string[] themeNames  = { "기본", "광부", "무법자", "판타지", "미래" };
+        var activeParts = new System.Collections.Generic.List<string>();
+
+        for (int i = 0; i < currentData.themeFlags.Length && i < themeNames.Length; i++)
+        {
+            if (!currentData.themeFlags[i]) continue;
+
+            // 해당 테마 색상을 hex로 변환
+            Color  col = i < themeColors.Length ? themeColors[i] : Color.white;
+            string hex = ColorUtility.ToHtmlStringRGB(col);
+
+            activeParts.Add($"<color=#{hex}><b>{themeNames[i]}</b></color>");
+        }
+
+        themeDisplayText.text = activeParts.Count > 0
+            ? string.Join(" | ", activeParts)
+            : "<color=#888888>기본</color>";
     }
 
     // ───────────────────────────────────────────────────────────
