@@ -196,8 +196,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 685.11816, y: 28.1321}
-  m_SizeDelta: {x: -1370.2365, y: 0}
+  m_AnchoredPosition: {x: 716.0266, y: 28.13211}
+  m_SizeDelta: {x: -1432.0532, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &43071724
 MonoBehaviour:
@@ -264,14 +264,42 @@ MonoBehaviour:
   buttonFontSize: 24
   buttonFont: {fileID: 11400000, guid: b5ba161392a3f6844b2c79bbe2a98f85, type: 2}
   portalColors:
-  - {r: 0.4, g: 0, b: 0.8, a: 1}
-  - {r: 0, g: 0.8, b: 0.8, a: 1}
-  - {r: 1, g: 0.85, b: 0, a: 1}
-  - {r: 0, g: 0.5, b: 1, a: 1}
-  - {r: 1, g: 0.4, b: 0.7, a: 1}
-  - {r: 0.6, g: 0.9, b: 0.2, a: 1}
-  - {r: 0.6, g: 0.35, b: 0.1, a: 1}
-  - {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  - r: 0.4
+    g: 0
+    b: 0.8
+    a: 1
+  - r: 0
+    g: 0.8
+    b: 0.8
+    a: 1
+  - r: 1
+    g: 0.85
+    b: 0
+    a: 1
+  - r: 0
+    g: 0.5
+    b: 1
+    a: 1
+  - r: 1
+    g: 0.4
+    b: 0.7
+    a: 1
+  - r: 0.6
+    g: 0.9
+    b: 0.2
+    a: 1
+  - r: 0.6
+    g: 0.35
+    b: 0.1
+    a: 1
+  - r: 0.7
+    g: 0.7
+    b: 0.7
+    a: 1
+  selectedElement: 49
+  selectedPortalChar: 50
+  currentSelectedButton: {fileID: 0}
+  currentThemeMode: 0
 --- !u!114 &43071727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -549,8 +577,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -840, y: -199}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -675.1497, y: -209.18762}
+  m_SizeDelta: {x: 377.7, y: 50.3753}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &99574191
 MonoBehaviour:
@@ -1206,8 +1234,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -2551,8 +2579,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 274.88177, y: -349.3183}
-  m_SizeDelta: {x: 529.76355, y: 0}
+  m_AnchoredPosition: {x: 243.97339, y: -349.3183}
+  m_SizeDelta: {x: 467.94678, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &614848506
 MonoBehaviour:
@@ -2793,7 +2821,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -734, y: -133}
+  m_AnchoredPosition: {x: -675, y: -133}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &654416694
@@ -3474,8 +3502,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -5300,8 +5328,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 274.88177, y: -35}
-  m_SizeDelta: {x: 529.7635, y: 0}
+  m_AnchoredPosition: {x: 243.97339, y: -35}
+  m_SizeDelta: {x: 467.94678, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1214560695
 MonoBehaviour:
@@ -5455,8 +5483,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 274.88177, y: -97}
-  m_SizeDelta: {x: 529.76355, y: 0}
+  m_AnchoredPosition: {x: 259.09656, y: -97}
+  m_SizeDelta: {x: 498.1931, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1234532601
 MonoBehaviour:
@@ -6338,6 +6366,17 @@ MonoBehaviour:
   confirmMessage: {fileID: 696552820}
   confirmOkBtn: {fileID: 1402042415}
   confirmCancelBtn: {fileID: 1936125074}
+  currentData:
+    mazeName: New Maze
+    mazeSize: 5
+    bgTheme: Default
+    savedAt: 
+    themeFlags: "\x01"
+    minerSkillCount: 0
+    outlawSkillCount: 0
+    matrixRows: []
+    portalPairs: []
+  currentN: 0
 --- !u!1 &1495104435
 GameObject:
   m_ObjectHideFlags: 0
@@ -7240,8 +7279,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 274.88177, y: -214.65915}
-  m_SizeDelta: {x: 529.76355, y: 0}
+  m_AnchoredPosition: {x: 274.88, y: -214.65915}
+  m_SizeDelta: {x: 529.76, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1705212127
 MonoBehaviour:
@@ -7319,8 +7358,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -842, y: -249}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -675.1498, y: -278}
+  m_SizeDelta: {x: 377.7, y: 50.3753}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1742331303
 MonoBehaviour:
@@ -8301,8 +8340,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -838, y: -310}
-  m_SizeDelta: {x: 160, y: 30}
+  m_AnchoredPosition: {x: -675, y: -349}
+  m_SizeDelta: {x: 377.7, y: 50.3753}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1980486543
 MonoBehaviour:
@@ -8883,6 +8922,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MazeEditorGrid
   mazeRenderer: {fileID: 2060482819}
   gridContainer: {fileID: 2060482817}
+  mazeN: 0
+  isDragging: 0
+  selectedElement: 49
 --- !u!114 &2060482819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8998,8 +9040,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 24
-  m_fontSizeBase: 24
+  m_fontSize: 32
+  m_fontSizeBase: 32
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
