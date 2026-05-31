@@ -166,9 +166,9 @@ GameObject:
   - component: {fileID: 43071723}
   - component: {fileID: 43071725}
   - component: {fileID: 43071724}
-  - component: {fileID: 43071726}
   - component: {fileID: 43071728}
   - component: {fileID: 43071727}
+  - component: {fileID: 43071729}
   m_Layer: 5
   m_Name: RightPanel
   m_TagString: Untagged
@@ -237,69 +237,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 43071722}
   m_CullTransparentMesh: 1
---- !u!114 &43071726
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 43071722}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56bfa82572fef1744af2eeb2fd9c88e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::MazeEditorItemBar
-  elementButtonContainer: {fileID: 966252718}
-  elementButtonPrefab: {fileID: 0}
-  portalColorContainer: {fileID: 1241559066}
-  portalColorButtonPrefab: {fileID: 0}
-  noneToggle: {fileID: 288029117}
-  minerToggle: {fileID: 1800971351}
-  outlawToggle: {fileID: 834184399}
-  skillCountSlider: {fileID: 1825410534}
-  skillCountLabel: {fileID: 1371439452}
-  bgThemeDropdown: {fileID: 1189269099}
-  elementCellSize: {x: 110, y: 44}
-  portalCellSize: {x: 110, y: 44}
-  buttonFontSize: 24
-  buttonFont: {fileID: 11400000, guid: b5ba161392a3f6844b2c79bbe2a98f85, type: 2}
-  portalColors:
-  - r: 0.4
-    g: 0
-    b: 0.8
-    a: 1
-  - r: 0
-    g: 0.8
-    b: 0.8
-    a: 1
-  - r: 1
-    g: 0.85
-    b: 0
-    a: 1
-  - r: 0
-    g: 0.5
-    b: 1
-    a: 1
-  - r: 1
-    g: 0.4
-    b: 0.7
-    a: 1
-  - r: 0.6
-    g: 0.9
-    b: 0.2
-    a: 1
-  - r: 0.6
-    g: 0.35
-    b: 0.1
-    a: 1
-  - r: 0.7
-    g: 0.7
-    b: 0.7
-    a: 1
-  selectedElement: 49
-  selectedPortalChar: 50
-  currentSelectedButton: {fileID: 0}
-  currentThemeMode: 0
 --- !u!114 &43071727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -340,6 +277,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
   m_HorizontalFit: 0
   m_VerticalFit: 2
+--- !u!114 &43071729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 43071722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3075f29a9ae63fb428b884157e01fb33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MazeEditorItemBar
+  elementButtonContainer: {fileID: 966252718}
+  elementButtonPrefab: {fileID: 0}
+  portalColorContainer: {fileID: 1241559066}
+  portalColorButtonPrefab: {fileID: 0}
+  noneToggle: {fileID: 288029117}
+  minerToggle: {fileID: 1800971351}
+  outlawToggle: {fileID: 834184399}
+  skillCountSlider: {fileID: 1825410534}
+  skillCountLabel: {fileID: 1371439452}
+  bgThemeDropdown: {fileID: 1189269099}
+  elementCellSize: {x: 110, y: 44}
+  portalCellSize: {x: 110, y: 44}
+  buttonFontSize: 24
+  buttonFont: {fileID: 11400000, guid: b5ba161392a3f6844b2c79bbe2a98f85, type: 2}
+  portalColors:
+  - {r: 0.4, g: 0, b: 0.8, a: 1}
+  - {r: 0, g: 0.8, b: 0.8, a: 1}
+  - {r: 1, g: 0.85, b: 0, a: 1}
+  - {r: 0, g: 0.5, b: 1, a: 1}
+  - {r: 1, g: 0.4, b: 0.7, a: 1}
+  - {r: 0.6, g: 0.9, b: 0.2, a: 1}
+  - {r: 0.6, g: 0.35, b: 0.1, a: 1}
+  - {r: 0.7, g: 0.7, b: 0.7, a: 1}
 --- !u!1 &75920781
 GameObject:
   m_ObjectHideFlags: 0
@@ -4796,8 +4768,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -734.1494, y: -19}
-  m_SizeDelta: {x: 377.7012, y: 138}
+  m_AnchoredPosition: {x: -594.4434, y: -19}
+  m_SizeDelta: {x: 657.1133, y: 138}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1149602760
 MonoBehaviour:
@@ -6345,12 +6317,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 1457253549}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f3f61e11bc7e454b95d25a16d72788a, type: 3}
+  m_Script: {fileID: 11500000, guid: 39ba8917392a3aa40992e6a4581afbad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MazeEditorUI
   mazeRenderer: {fileID: 2060482819}
   editorGrid: {fileID: 2060482818}
-  itemBar: {fileID: 43071726}
+  itemBar: {fileID: 43071729}
   mazeNameInput: {fileID: 2031051518}
   mazeSizeInput: {fileID: 654416694}
   applyBtn: {fileID: 99574191}
@@ -6359,24 +6331,13 @@ MonoBehaviour:
   statusText: {fileID: 1149602760}
   fileBrowserPanel: {fileID: 867257208}
   fileListContainer: {fileID: 515241105}
-  fileItemPrefab: {fileID: 1144540796661359568, guid: 4d22f778c3fd78b479f3ffb81ee8772d, type: 3}
+  fileItemPrefab: {fileID: 0}
   fileBrowserCloseBtn: {fileID: 451029791}
   fileDeleteBtn: {fileID: 1829583208}
   confirmPanel: {fileID: 1833105086}
   confirmMessage: {fileID: 696552820}
   confirmOkBtn: {fileID: 1402042415}
   confirmCancelBtn: {fileID: 1936125074}
-  currentData:
-    mazeName: New Maze
-    mazeSize: 5
-    bgTheme: Default
-    savedAt: 
-    themeFlags: "\x01"
-    minerSkillCount: 0
-    outlawSkillCount: 0
-    matrixRows: []
-    portalPairs: []
-  currentN: 0
 --- !u!1 &1495104435
 GameObject:
   m_ObjectHideFlags: 0
@@ -8917,14 +8878,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2060482816}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9f4f9a3363be7db48830f95341288541, type: 3}
+  m_Script: {fileID: 11500000, guid: bd7733c42fea3bb4f82292119592a7b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MazeEditorGrid
   mazeRenderer: {fileID: 2060482819}
   gridContainer: {fileID: 2060482817}
-  mazeN: 0
-  isDragging: 0
-  selectedElement: 49
 --- !u!114 &2060482819
 MonoBehaviour:
   m_ObjectHideFlags: 0
