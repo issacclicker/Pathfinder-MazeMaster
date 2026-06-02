@@ -64,10 +64,10 @@ public class MazeEditorUI : MonoBehaviour
 
     [Header("── 테마 표시 UI ─────────────────────")]
 
-    [Tooltip("현재 미로의 활성 테마 목록을 표시하는 TMP_Text. 요소를 배치할 때마다 자동으로 갱신됩니다. 예시 표시: 판타지 | 미래 테마가 없으면: 기본")]
+    [Tooltip("현재 미로의 활성 테마 목록을 표시하는 TMP_Text.요소를 배치할 때마다 자동으로 갱신됩니다.예시 표시: 판타지 | 미래테마가 없으면: 기본")]
     [SerializeField] private TMP_Text themeDisplayText;
 
-    [Tooltip("테마 태그 배경 색상 설정. 인덱스: 0=기본, 1=광부, 2=무법자, 3=판타지, 4=미래")]
+    [Tooltip("테마 태그 배경 색상 설정.인덱스: 0=기본, 1=광부, 2=무법자, 3=판타지, 4=미래")]
     [SerializeField] private Color[] themeColors = new Color[]
     {
         new Color(0.50f, 0.50f, 0.50f), // 기본  — 회색
@@ -108,6 +108,26 @@ public class MazeEditorUI : MonoBehaviour
     [Tooltip("팝업 취소 버튼")]
     [SerializeField] private Button confirmCancelBtn;
 
+    [Header("── 플레이 테스트 ──────────────────────")]
+
+    [Tooltip("플레이 테스트 시작/중단 버튼.버튼 텍스트가 상태에 따라 자동으로 변경됩니다.")]
+    [SerializeField] private Button playTestBtn;
+
+    [Tooltip("플레이 테스트 버튼의 TMP_Text (버튼 자식 오브젝트).플레이 중: '■ 중단', 편집 중: '▶ 플레이'로 자동 변경됩니다.")]
+    [SerializeField] private TMP_Text playTestBtnLabel;
+
+    [Tooltip("PlayerController 컴포넌트.플레이 테스트 시 InitPlayer 호출에 사용됩니다.")]
+    [SerializeField] private PlayerController playerController;
+
+    [Tooltip("플레이 중 비활성화할 편집 UI 패널.플레이 시작 시 숨김, 중단 시 다시 표시됩니다.")]
+    [SerializeField] private GameObject rightPanel;
+
+    [Tooltip("플레이 버튼 색상 — 편집 모드 (기본 상태)")]
+    [SerializeField] private Color playBtnColorEdit = new Color(0.20f, 0.75f, 0.30f);
+
+    [Tooltip("플레이 버튼 색상 — 플레이 중 (중단 강조)")]
+    [SerializeField] private Color playBtnColorPlay = new Color(0.85f, 0.25f, 0.25f);
+
     // ───────────────────────────────────────────────────────────
     // 내부 상태
     // ───────────────────────────────────────────────────────────
@@ -128,6 +148,12 @@ public class MazeEditorUI : MonoBehaviour
 
     // 상태 메시지 자동 숨김 코루틴
     private Coroutine statusHideCoroutine;
+
+    // 플레이 테스트 상태
+    private bool isPlayTesting = false;
+
+    // 플레이 테스트 시작 전 matrix 스냅샷 (플레이 중 편집 방지 및 복원용)
+    private char[,] matrixSnapshot;
 
     // ───────────────────────────────────────────────────────────
     // Unity 생명주기
@@ -152,6 +178,9 @@ public class MazeEditorUI : MonoBehaviour
 
         fileBrowserCloseBtn?.onClick.AddListener(() => fileBrowserPanel?.SetActive(false));
         fileDeleteBtn?.onClick.AddListener(OnDeleteFileClicked);
+
+        playTestBtn?.onClick.AddListener(OnPlayTestBtnClicked);
+        RefreshPlayTestBtn(); // 초기 버튼 상태 설정
 
         confirmOkBtn?.onClick.AddListener(OnConfirmOk);
         confirmCancelBtn?.onClick.AddListener(() => confirmPanel?.SetActive(false));
@@ -528,6 +557,118 @@ public class MazeEditorUI : MonoBehaviour
     private void OnBgThemeChanged(string theme)
     {
         if (currentData != null) currentData.bgTheme = theme;
+    }
+
+    // ───────────────────────────────────────────────────────────
+    // 플레이 테스트
+    // ───────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// 플레이 테스트 버튼 클릭 시 호출됩니다.
+    /// 현재 상태에 따라 시작 또는 중단을 처리합니다.
+    /// </summary>
+    private void OnPlayTestBtnClicked()
+    {
+        if (isPlayTesting) StopPlayTest();
+        else               StartPlayTest();
+    }
+
+    /// <summary>
+    /// 플레이 테스트를 시작합니다.
+    /// 유효성 검사 → matrix 스냅샷 저장 → 편집 UI 비활성화 → PlayerController 초기화
+    /// </summary>
+    private void StartPlayTest()
+    {
+        // 시작점 존재 여부 확인
+        bool hasStart = false;
+        for (int r = 0; r < currentN && !hasStart; r++)
+            for (int c = 0; c < currentN && !hasStart; c++)
+                if (matrix[r, c] == 's') hasStart = true;
+
+        if (!hasStart)
+        {
+            ShowStatus("플레이 테스트 실패: 시작 위치(s)가 없습니다.", isError: true);
+            return;
+        }
+
+        if (playerController == null)
+        {
+            ShowStatus("플레이 테스트 실패: PlayerController가 연결되지 않았습니다.", isError: true);
+            return;
+        }
+
+        // 현재 matrix 스냅샷 저장 (플레이 테스트 중 원본 보존)
+        matrixSnapshot = (char[,])matrix.Clone();
+
+        isPlayTesting = true;
+
+        // 편집 UI 비활성화 (RightPanel, 각종 버튼)
+        rightPanel?.SetActive(false);
+        applyBtn?.gameObject.SetActive(false);
+        saveBtn?.gameObject.SetActive(false);
+        loadBtn?.gameObject.SetActive(false);
+
+        // 그리드 입력 잠금
+        editorGrid.SetEditingEnabled(false);
+
+        // 플레이어 초기화 및 소환
+        Maze playMaze = currentData.ToMaze();
+        // matrix를 현재 편집본으로 교체 (ToMaze는 저장된 matrixRows를 쓰므로 직접 주입)
+        playMaze = new Maze(playMaze.difficulty, matrixSnapshot, playMaze.minerSkillCount, playMaze.outlawSkillCount);
+
+        mazeRenderer.RenderMaze(matrixSnapshot);
+        playerController.InitPlayer(playMaze);
+
+        RefreshPlayTestBtn();
+        ShowStatus("플레이 테스트 시작. WASD 또는 방향키로 이동하세요.");
+    }
+
+    /// <summary>
+    /// 플레이 테스트를 중단하고 편집 모드로 복귀합니다.
+    /// 플레이어를 숨기고 편집 UI를 다시 활성화합니다.
+    /// </summary>
+    private void StopPlayTest()
+    {
+        isPlayTesting = false;
+
+        // 플레이어 비활성화
+        playerController?.HidePlayer();
+
+        // 편집 UI 복원
+        rightPanel?.SetActive(true);
+        applyBtn?.gameObject.SetActive(true);
+        saveBtn?.gameObject.SetActive(true);
+        loadBtn?.gameObject.SetActive(true);
+
+        // 그리드 입력 복원
+        editorGrid.SetEditingEnabled(true);
+
+        // matrix를 스냅샷으로 복원 (플레이 중 발생한 변경사항 무시)
+        if (matrixSnapshot != null)
+        {
+            matrix = (char[,])matrixSnapshot.Clone();
+            mazeRenderer.RenderMaze(matrix);
+            editorGrid.InitGrid(matrix);
+        }
+
+        RefreshPlayTestBtn();
+        ShowStatus("편집 모드로 돌아왔습니다.");
+    }
+
+    /// <summary>
+    /// 플레이 테스트 버튼의 텍스트와 색상을 현재 상태에 맞게 갱신합니다.
+    /// </summary>
+    private void RefreshPlayTestBtn()
+    {
+        if (playTestBtnLabel != null)
+            playTestBtnLabel.text = isPlayTesting ? "테스트 중단" : "테스트 플레이";
+
+        if (playTestBtn != null)
+        {
+            Image btnImage = playTestBtn.GetComponent<Image>();
+            if (btnImage != null)
+                btnImage.color = isPlayTesting ? playBtnColorPlay : playBtnColorEdit;
+        }
     }
 
     // ───────────────────────────────────────────────────────────

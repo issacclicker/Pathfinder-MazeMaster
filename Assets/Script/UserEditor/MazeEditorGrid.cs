@@ -77,6 +77,31 @@ public class MazeEditorGrid : MonoBehaviour
     /// </summary>
     public char[,] GetMatrix() => matrix;
 
+    /// <summary>
+    /// 그리드 편집 입력을 활성화하거나 비활성화합니다.
+    /// 플레이 테스트 중에는 false로 설정해 편집을 막습니다.
+    /// </summary>
+    public void SetEditingEnabled(bool enabled)
+    {
+        if (mazeRenderer == null || mazeN == 0) return;
+
+        for (int row = 0; row < mazeN; row++)
+        {
+            for (int col = 0; col < mazeN; col++)
+            {
+                RectTransform cellRt = mazeRenderer.GetCellRectTransform(row, col);
+                if (cellRt == null) continue;
+
+                // EventTrigger를 활성/비활성화해 입력을 차단합니다.
+                EventTrigger trigger = cellRt.GetComponent<EventTrigger>();
+                if (trigger != null) trigger.enabled = enabled;
+            }
+        }
+
+        // 드래그 상태도 초기화
+        if (!enabled) isDragging = false;
+    }
+
     // ───────────────────────────────────────────────────────────
     // 셀 EventTrigger 등록
     // ───────────────────────────────────────────────────────────

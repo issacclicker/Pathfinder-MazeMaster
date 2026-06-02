@@ -136,7 +136,6 @@ public class PlayerController : MonoBehaviour
                     playerRow = r;
                     playerCol = c;
                     found = true;
-                    
                 }
             }
         }
@@ -176,7 +175,6 @@ public class PlayerController : MonoBehaviour
         SnapToCell(row, col);
         if (playerVisual != null)
             playerVisual.gameObject.SetActive(true);
-
     }
 
     /// <summary>
@@ -217,6 +215,21 @@ public class PlayerController : MonoBehaviour
     /// 현재 이동 횟수를 반환합니다.
     /// </summary>
     public int GetMoveCount() => moveCount;
+
+    /// <summary>
+    /// 플레이어 비주얼을 숨기고 이동을 중단합니다.
+    /// 플레이 테스트 종료 시 MazeEditorUI에서 호출합니다.
+    /// </summary>
+    public void HidePlayer()
+    {
+        if (playerVisual != null)
+            playerVisual.gameObject.SetActive(false);
+
+        // 진행 중인 이동 코루틴 중단
+        StopAllCoroutines();
+        isMoving = false;
+        matrix   = null; // 입력 차단
+    }
 
     // ───────────────────────────────────────────────────────────
     // 이동 가능 여부 판단
