@@ -10,8 +10,6 @@ public class MazeTest : MonoBehaviour
     [SerializeField]
     private GameObject playerController;
 
-    private Maze _maze;
-
     [SerializeField] [Tooltip("미로 크기")]
     int mazeSize = 3;
 
@@ -46,18 +44,8 @@ public class MazeTest : MonoBehaviour
         }
         Debug.Log(mazeGridText);
 
-        _maze = resultMaze;
-        StartCoroutine(RenderMaze());
-        // mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
-        // playerController.GetComponent<PlayerController>().InitPlayer(resultMaze);
+        mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(resultMaze);
+        playerController.GetComponent<PlayerController>().InitPlayer(resultMaze);
     }
 
-    IEnumerator RenderMaze()
-    {
-        mazeRenderer.GetComponent<MazeRenderer>().RenderMaze(_maze);
-        yield return new WaitForSeconds(.1f);
-        playerController.GetComponent<PlayerController>().InitPlayer(_maze);
-        yield return new WaitForSeconds(.05f);
-        playerController.GetComponent<PlayerController>().SnapToCell(1,1); // 로직 해결 불가능해서 땜빵해놓음 수정 필요
-    }
 }

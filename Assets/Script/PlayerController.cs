@@ -8,11 +8,17 @@ using UnityEngine.InputSystem;
 /// 미로 내 플레이어 캐릭터를 제어합니다.
 ///
 /// [씬 설정 방법]
-/// 1. Canvas > GridContainer 와 같은 레벨(혹은 그 위)에 빈 GameObject를 만들고
-///    이 스크립트를 부착합니다.
-/// 2. Inspector에서 mazeRenderer, gridContainer를 연결합니다.
-/// 3. playerVisual은 비워두면 원형 이미지를 자동 생성합니다.
-/// 4. InitPlayer(maze) 를 호출하면 시작 위치에 플레이어가 배치됩니다.
+/// 1. Canvas 아래에 PlayerLayer (Create Empty) 오브젝트를 만들고
+///    GridContainer와 동일한 위치/크기로 맞춥니다.
+/// 2. 이 스크립트를 아무 오브젝트에나 부착합니다.
+/// 3. Inspector에서 mazeRenderer, gridContainer, playerLayer를 연결합니다.
+/// 4. playerVisual은 비워두면 원형 이미지를 자동 생성합니다.
+/// 5. InitPlayer(maze) 를 호출하면 시작 위치에 플레이어가 배치됩니다.
+///
+/// [핵심 설계]
+///   플레이어는 GridLayoutGroup이 없는 PlayerLayer의 자식으로 생성됩니다.
+///   GridLayoutGroup은 자신의 직계 자식 위치를 매 프레임 강제로 덮어쓰므로
+///   플레이어가 gridContainer의 자식이면 위치가 항상 틀어집니다.
 ///
 /// [의존 관계]
 ///   MazeRenderer  — 셀 위치 계산 및 UpdateCell 호출
@@ -32,8 +38,10 @@ public class PlayerController : MonoBehaviour
     [Tooltip("GridLayoutGroup이 부착된 컨테이너 RectTransform.\n셀 위치 계산의 기준점입니다.")]
     [SerializeField] private RectTransform gridContainer;
 
-    [Tooltip("플레이어 비주얼로 사용할 Image 오브젝트.\n" +
-             "비워두면 원형 Image를 자동 생성합니다.")]
+    [Tooltip("플레이어 오브젝트가 생성될 부모 레이어.\nGridContainer와 동일한 위치/크기의 빈 오브젝트를 연결하세요.\nGridLayoutGroup이 없어야 합니다.")]
+    [SerializeField] private RectTransform playerLayer;
+
+    [Tooltip("플레이어 비주얼로 사용할 Image 오브젝트.\n비워두면 원형 Image를 자동 생성합니다.")]
     [SerializeField] private Image playerVisual;
 
     [Header("── 플레이어 비주얼 ─────────────────────")]
@@ -98,6 +106,8 @@ public class PlayerController : MonoBehaviour
             Debug.LogError("[PlayerController] mazeRenderer가 연결되지 않았습니다. Inspector를 확인하세요.");
         if (gridContainer == null)
             Debug.LogError("[PlayerController] gridContainer가 연결되지 않았습니다. Inspector를 확인하세요.");
+        if (playerLayer == null)
+            Debug.LogWarning("[PlayerController] playerLayer가 연결되지 않았습니다. gridContainer를 대신 사용합니다.GridLayoutGroup의 간섭으로 플레이어 위치가 틀어질 수 있습니다.");
     }
 
     // ───────────────────────────────────────────────────────────
@@ -534,7 +544,7 @@ public class PlayerController : MonoBehaviour
     /// 직접 대입합니다. anchoredPosition 계산을 완전히 우회하므로
     /// 앵커/pivot/Canvas 스케일과 무관하게 항상 정확합니다.
     /// </summary>
-    public void SnapToCell(int row, int col)
+    private void SnapToCell(int row, int col)
     {
         if (playerVisual == null) return;
 
@@ -689,15 +699,13 @@ public class PlayerController : MonoBehaviour
 
     /// <summary>
     /// playerVisual이 없으면 원형 Image를 자동 생성합니다.
-    /// gridContainer의 자식으로 생성되어 미로 위에 오버레이됩니다.
     ///
-    /// [수정 내용]
-    /// - GameObject를 직접 new 하면 씬 루트에 일반 Transform으로 생성되어
-    ///   Canvas 계층에 편입되지 않는 문제가 있었습니다.
-    /// - typeof(RectTransform)을 생성자에 전달해 처음부터 RectTransform을
-    ///   포함한 채 생성하고, 즉시 gridContainer의 자식으로 배치합니다.
-    /// - 앵커를 좌상단 (0,1)으로 고정해 GetCellAnchoredPosition의
-    ///   계산 기준과 일치시켰습니다.
+    /// [핵심]
+    /// 플레이어를 gridContainer가 아닌 playerLayer의 자식으로 생성합니다.
+    /// GridLayoutGroup은 자신의 직계 자식 위치를 매 프레임 강제로 덮어쓰기 때문에
+    /// gridContainer의 자식으로 만들면 어떤 좌표를 설정해도 무시됩니다.
+    /// playerLayer는 GridLayoutGroup이 없는 별도 오브젝트이므로
+    /// 플레이어 위치가 외부에 의해 변경되지 않습니다.
     /// </summary>
     private void EnsurePlayerVisual()
     {
@@ -707,26 +715,22 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // ── 핵심 수정 1: typeof(RectTransform) 포함해 생성 후 즉시 SetParent ──
-        // new GameObject() 후 SetParent 하면 씬 루트에 일반 Transform으로 먼저
-        // 생성되어 Canvas 계층에 편입되지 않는 문제가 있습니다.
-        // RectTransform을 생성자에 포함하고 worldPositionStays=false로
-        // SetParent 해야 로컬 좌표가 올바르게 초기화됩니다.
-        GameObject go = new GameObject("Player", typeof(RectTransform));
-        go.transform.SetParent(gridContainer, false); // worldPositionStays=false
+        // playerLayer가 없으면 gridContainer를 fallback으로 사용
+        // (GridLayoutGroup 간섭 경고가 Awake에서 이미 출력됨)
+        RectTransform parent = playerLayer != null ? playerLayer : gridContainer;
 
-        // 미로 셀들보다 위에 렌더링되도록 sibling index를 마지막으로
+        GameObject go = new GameObject("Player", typeof(RectTransform));
+        go.transform.SetParent(parent, false);
         go.transform.SetAsLastSibling();
 
-        // Image 추가 및 색상/스프라이트 설정
         playerVisual               = go.AddComponent<Image>();
         playerVisual.color         = playerColor;
         playerVisual.sprite        = CreateCircleSprite(64);
-        playerVisual.raycastTarget = false; // 셀 클릭 이벤트 투과
+        playerVisual.raycastTarget = false;
 
-        // 앵커와 pivot 모두 (0.5, 0.5) 중앙으로 설정합니다.
-        // SnapToCell에서 셀의 월드 좌표를 Canvas 기준으로 변환해 직접 대입하므로
-        // 앵커 기준점이 무엇이든 상관없습니다.
+        // anchor/pivot을 중앙(0.5, 0.5)으로 설정합니다.
+        // SnapToCell은 position(월드 좌표)을 직접 대입하므로
+        // anchor 값은 위치 계산에 영향을 주지 않습니다.
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchorMin        = new Vector2(0.5f, 0.5f);
         rt.anchorMax        = new Vector2(0.5f, 0.5f);
