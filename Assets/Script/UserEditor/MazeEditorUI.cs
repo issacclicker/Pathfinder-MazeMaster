@@ -118,7 +118,7 @@ public class MazeEditorUI : MonoBehaviour
     [Tooltip("플레이 테스트 시작/중단 버튼.버튼 텍스트가 상태에 따라 자동으로 변경됩니다.")]
     [SerializeField] private Button playTestBtn;
 
-    [Tooltip("플레이 테스트 버튼의 TMP_Text (버튼 자식 오브젝트).플레이 중: '■ 중단', 편집 중: '▶ 플레이'로 자동 변경됩니다.")]
+    [Tooltip("플레이 테스트 버튼의 TMP_Text (버튼 자식 오브젝트).플레이 중: '중단', 편집 중: '플레이'로 자동 변경됩니다.")]
     [SerializeField] private TMP_Text playTestBtnLabel;
 
     [Tooltip("PlayerController 컴포넌트.플레이 테스트 시 InitPlayer 호출에 사용됩니다.")]
@@ -337,6 +337,15 @@ public class MazeEditorUI : MonoBehaviour
         // 기존 항목 제거
         foreach (Transform child in fileListContainer)
             Destroy(child.gameObject);
+
+        // 디버그: Content와 부모 너비 확인
+        RectTransform contentRt = fileListContainer as RectTransform;
+        if (contentRt != null)
+        {
+            Debug.Log($"[FileBrowser] Content rect.width={contentRt.rect.width}, sizeDelta={contentRt.sizeDelta}, anchorMin={contentRt.anchorMin}, anchorMax={contentRt.anchorMax}");
+            if (contentRt.parent is RectTransform parentRt)
+                Debug.Log($"[FileBrowser] Viewport rect.width={parentRt.rect.width}");
+        }
 
         List<SaveFileInfo> files = MazeEditorSaveLoad.LoadFileList();
 
@@ -666,7 +675,7 @@ public class MazeEditorUI : MonoBehaviour
     private void RefreshPlayTestBtn()
     {
         if (playTestBtnLabel != null)
-            playTestBtnLabel.text = isPlayTesting ? "테스트 중단" : "테스트 플레이";
+            playTestBtnLabel.text = isPlayTesting ? "중단" : "플레이";
 
         if (playTestBtn != null)
         {
