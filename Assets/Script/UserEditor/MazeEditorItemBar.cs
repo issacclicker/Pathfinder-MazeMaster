@@ -28,57 +28,45 @@ public class MazeEditorItemBar : MonoBehaviour
 
     [Header("── 요소 버튼 컨테이너 ─────────────────")]
 
-    [Tooltip("요소 버튼들이 배치될 부모 Transform\n" +
-             "GridLayoutGroup + ContentSizeFitter(Vertical: Preferred Size) 권장")]
+    [Tooltip("요소 버튼들이 배치될 부모 Transform\nGridLayoutGroup + ContentSizeFitter(Vertical: Preferred Size) 권장")]
     [SerializeField] private Transform elementButtonContainer;
 
-    [Tooltip("요소 버튼 프리팹 (Button + TMP_Text 포함).\n" +
-             "비워두면 자동 생성합니다.")]
+    [Tooltip("요소 버튼 프리팹 (Button + TMP_Text 포함).\n비워두면 자동 생성합니다.")]
     [SerializeField] private GameObject elementButtonPrefab;
 
     [Header("── 포탈 색 선택 ─────────────────────")]
 
-    [Tooltip("포탈 색 버튼들이 배치될 부모 Transform\n" +
-             "GridLayoutGroup + ContentSizeFitter(Vertical: Preferred Size) 권장")]
+    [Tooltip("포탈 색 버튼들이 배치될 부모 Transform\nGridLayoutGroup + ContentSizeFitter(Vertical: Preferred Size) 권장")]
     [SerializeField] private Transform portalColorContainer;
 
-    [Tooltip("포탈 색 버튼 프리팹.\n" +
-             "비워두면 자동 생성합니다.")]
+    [Tooltip("포탈 색 버튼 프리팹.\n비워두면 자동 생성합니다.")]
     [SerializeField] private GameObject portalColorButtonPrefab;
 
     [Header("── 광부 / 무법자 테마 (통합) ────────────")]
 
-    [Tooltip("'없음' 토글: 광부/무법자 테마를 사용하지 않습니다.\n" +
-             "이 토글이 켜지면 슬라이더가 비활성화됩니다.")]
+    [Tooltip("'없음' 토글: 광부/무법자 테마를 사용하지 않습니다.\n이 토글이 켜지면 슬라이더가 비활성화됩니다.")]
     [SerializeField] private Toggle noneToggle;
 
-    [Tooltip("'광부' 토글: 광부 테마를 활성화합니다.\n" +
-             "슬라이더가 '곡괭이 횟수'를 나타냅니다.")]
+    [Tooltip("'광부' 토글: 광부 테마를 활성화합니다.\n슬라이더가 '곡괭이 횟수'를 나타냅니다.")]
     [SerializeField] private Toggle minerToggle;
 
-    [Tooltip("'무법자' 토글: 무법자 테마를 활성화합니다.\n" +
-             "슬라이더가 '폭탄 횟수'를 나타냅니다.")]
+    [Tooltip("'무법자' 토글: 무법자 테마를 활성화합니다.\n슬라이더가 '폭탄 횟수'를 나타냅니다.")]
     [SerializeField] private Toggle outlawToggle;
 
-    [Tooltip("스킬 사용 횟수 슬라이더 (1~5).\n" +
-             "'없음' 선택 시 비활성화됩니다.")]
+    [Tooltip("스킬 사용 횟수 슬라이더 (1~5).\n'없음' 선택 시 비활성화됩니다.")]
     [SerializeField] private Slider skillCountSlider;
 
-    [Tooltip("슬라이더 값 표시 텍스트.\n" +
-             "선택된 토글에 따라 '곡괭이 횟수: N회' 또는 '폭탄 횟수: N회'로 자동 변경됩니다.")]
+    [Tooltip("슬라이더 값 표시 텍스트.\n선택된 토글에 따라 '곡괭이 횟수: N회' 또는 '폭탄 횟수: N회'로 자동 변경됩니다.")]
     [SerializeField] private TMP_Text skillCountLabel;
 
     [Header("── 배경 테마 ────────────────────────")]
 
-    [Tooltip("배경 테마 선택 드롭다운.\n" +
-             "옵션 목록은 런타임에 자동으로 채워집니다.")]
+    [Tooltip("배경 테마 선택 드롭다운.\n옵션 목록은 런타임에 자동으로 채워집니다.")]
     [SerializeField] private TMP_Dropdown bgThemeDropdown;
 
     [Header("── 버튼 크기 설정 ────────────────────")]
 
-    [Tooltip("요소 버튼 셀 크기 (픽셀).\n" +
-             "GridLayoutGroup의 Cell Size에 반영됩니다.\n" +
-             "패널 너비에 맞게 조정하세요.")]
+    [Tooltip("요소 버튼 셀 크기 (픽셀).\nGridLayoutGroup의 Cell Size에 반영됩니다.\n패널 너비에 맞게 조정하세요.")]
     [SerializeField] private Vector2 elementCellSize = new Vector2(90f, 44f);
 
     [Tooltip("포탈 버튼 셀 크기 (픽셀).")]
@@ -89,15 +77,12 @@ public class MazeEditorItemBar : MonoBehaviour
 
     [Header("── 폰트 설정 ─────────────────────────")]
 
-    [Tooltip("버튼 텍스트에 사용할 TMP Font Asset.\n" +
-             "비워두면 TMP 기본 폰트를 사용합니다.\n" +
-             "한글 사용 시 한글 문자셋이 포함된 Font Asset을 지정하세요.")]
+    [Tooltip("버튼 텍스트에 사용할 TMP Font Asset.\n비워두면 TMP 기본 폰트를 사용합니다.\n한글 사용 시 한글 문자셋이 포함된 Font Asset을 지정하세요.")]
     [SerializeField] private TMP_FontAsset buttonFont;
 
     [Header("── 색상 설정 ─────────────────────────")]
 
-    [Tooltip("포탈 버튼 색상 목록 (인덱스 0='2', 인덱스 7='9').\n" +
-             "MazeRenderer의 colorPortals 배열과 동일하게 맞추세요.")]
+    [Tooltip("포탈 버튼 색상 목록 (인덱스 0='2', 인덱스 7='9').\nMazeRenderer의 colorPortals 배열과 동일하게 맞추세요.")]
     [SerializeField] private Color[] portalColors = new Color[]
     {
         new Color(0.40f, 0.00f, 0.80f), // 보라
@@ -294,9 +279,13 @@ public class MazeEditorItemBar : MonoBehaviour
             noneToggle.isOn = true; // 초기값: 없음
             noneToggle.onValueChanged.AddListener(isOn =>
             {
-                if (!isOn) return; // 다른 토글이 켜지면서 발생하는 false 이벤트 무시
+                if (!isOn)
+                {
+                    // 이미 선택된 토글을 다시 클릭한 경우 강제로 다시 켬
+                    if (currentThemeMode == 0) noneToggle.isOn = true;
+                    return;
+                }
                 currentThemeMode = 0;
-                // 나머지 토글 강제 해제 (이벤트 루프 방지를 위해 isOn 체크 후 해제)
                 if (minerToggle  != null && minerToggle.isOn)  minerToggle.isOn  = false;
                 if (outlawToggle != null && outlawToggle.isOn) outlawToggle.isOn = false;
                 RefreshSkillControls();
@@ -310,7 +299,11 @@ public class MazeEditorItemBar : MonoBehaviour
             minerToggle.isOn = false;
             minerToggle.onValueChanged.AddListener(isOn =>
             {
-                if (!isOn) return;
+                if (!isOn)
+                {
+                    if (currentThemeMode == 1) minerToggle.isOn = true;
+                    return;
+                }
                 currentThemeMode = 1;
                 if (noneToggle   != null && noneToggle.isOn)   noneToggle.isOn   = false;
                 if (outlawToggle != null && outlawToggle.isOn) outlawToggle.isOn = false;
@@ -325,7 +318,11 @@ public class MazeEditorItemBar : MonoBehaviour
             outlawToggle.isOn = false;
             outlawToggle.onValueChanged.AddListener(isOn =>
             {
-                if (!isOn) return;
+                if (!isOn)
+                {
+                    if (currentThemeMode == 2) outlawToggle.isOn = true;
+                    return;
+                }
                 currentThemeMode = 2;
                 if (noneToggle  != null && noneToggle.isOn)  noneToggle.isOn  = false;
                 if (minerToggle != null && minerToggle.isOn) minerToggle.isOn = false;

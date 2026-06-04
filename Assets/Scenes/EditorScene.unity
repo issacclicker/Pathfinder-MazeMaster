@@ -6819,6 +6819,7 @@ MonoBehaviour:
   saveBtn: {fileID: 1742331303}
   loadBtn: {fileID: 1980486543}
   statusText: {fileID: 1149602760}
+  fileBrowserFont: {fileID: 11400000, guid: b5ba161392a3f6844b2c79bbe2a98f85, type: 2}
   themeDisplayText: {fileID: 85392252}
   themeColors:
   - {r: 0.5, g: 0.5, b: 0.5, a: 1}

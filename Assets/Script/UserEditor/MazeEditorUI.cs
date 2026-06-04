@@ -62,6 +62,11 @@ public class MazeEditorUI : MonoBehaviour
     [Tooltip("상태 메시지 표시 텍스트 (저장 성공/실패 등)")]
     [SerializeField] private TMP_Text statusText;
 
+    [Header("── 폰트 설정 ─────────────────────────")]
+
+    [Tooltip("파일 브라우저 아이템 버튼의 TMP Font Asset.비워두면 TMP 기본 폰트를 사용합니다.")]
+    [SerializeField] private TMP_FontAsset fileBrowserFont;
+
     [Header("── 테마 표시 UI ─────────────────────")]
 
     [Tooltip("현재 미로의 활성 테마 목록을 표시하는 TMP_Text.요소를 배치할 때마다 자동으로 갱신됩니다.예시 표시: 판타지 | 미래테마가 없으면: 기본")]
@@ -862,21 +867,30 @@ public class MazeEditorUI : MonoBehaviour
 
         Button btn = go.AddComponent<Button>();
 
+        // Width를 0으로 두면 VerticalLayoutGroup이 너비를 제어하지 않을 때
+        // 아이템이 찌그러져 보이지 않는 문제가 발생합니다.
+        // anchorMin/Max를 (0,0)~(1,0) stretch로 설정해 부모 너비를 자동으로 따라가게 합니다.
         RectTransform rt = go.GetComponent<RectTransform>();
-        rt.sizeDelta = new Vector2(0f, 50f);
+        rt.anchorMin = new Vector2(0f, 0f);
+        rt.anchorMax = new Vector2(1f, 0f);
+        rt.pivot     = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(0f, 50f); // Width=0은 stretch일 때 "부모 너비 그대로"를 의미
 
         GameObject textGo = new GameObject("Label", typeof(RectTransform));
         textGo.transform.SetParent(go.transform, false);
+
         RectTransform textRt = textGo.GetComponent<RectTransform>();
         textRt.anchorMin = Vector2.zero;
         textRt.anchorMax = Vector2.one;
-        textRt.sizeDelta = Vector2.zero;
-        textRt.offsetMin = new Vector2(10f, 0f);
+        textRt.offsetMin = new Vector2(12f, 0f);
+        textRt.offsetMax = new Vector2(-12f, 0f);
 
         TMP_Text tmp = textGo.AddComponent<TextMeshProUGUI>();
-        tmp.text      = label;
-        tmp.fontSize  = 14;
-        tmp.alignment = TextAlignmentOptions.MidlineLeft;
+        tmp.text          = label;
+        tmp.fontSize      = 14;
+        tmp.alignment     = TextAlignmentOptions.MidlineLeft;
+        tmp.raycastTarget = false;
+        if (fileBrowserFont != null) tmp.font = fileBrowserFont;
 
         return go;
     }
